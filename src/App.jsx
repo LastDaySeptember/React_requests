@@ -4,20 +4,7 @@ import styles from "./App.module.css";
 const taskListURL = "https://jsonplaceholder.typicode.com/todos";
 
 function App() {
-  const [taskList, setTaskList] = useState([
-    {
-      userId: 1,
-      id: 1,
-      title: "delectus aut autem",
-      completed: true,
-    },
-    {
-      userId: 1,
-      id: 1,
-      title: "delectus aut autem",
-      completed: false,
-    },
-  ]);
+  const [taskList, setTaskList] = useState([]);
 
   useEffect(() => {
     fetch(taskListURL)
