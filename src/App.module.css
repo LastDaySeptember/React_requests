@@ -1,0 +1,47 @@
+.taskContainer {
+  margin: 0 auto;
+  width: 100%;
+  height: auto;
+}
+
+h1 {
+  margin: 0 auto;
+  margin-bottom: 2rem;
+}
+
+ul {
+  list-style: decimal;
+  list-style-position: inside;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-items: flex-start;
+}
+
+li {
+  min-width: 30rem;
+  text-align: start;
+  padding: 1rem 1.5rem;
+  background-color: rgba(240, 248, 255, 0.112);
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+  outline: 2px solid rgba(255, 255, 255, 0);
+}
+
+li:hover {
+  background-color: rgba(240, 248, 255, 0.251);
+}
+
+li.completedTaskItem:hover {
+  outline: 2px solid rgba(139, 255, 139, 0.671);
+}
+
+li.unCompletedTaskItem:hover {
+  outline: 2px solid rgba(255, 80, 80, 0.708);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}

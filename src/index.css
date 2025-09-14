@@ -11,6 +11,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  box-sizing: border-box;
 }
 
 a {
@@ -23,10 +28,13 @@ a:hover {
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
+  padding: 5rem;
   display: flex;
-  place-items: center;
+  align-items: flex-start;
+  justify-content: center;
   min-width: 320px;
+  max-width: 1440px;
   min-height: 100vh;
 }
 

@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from "react";
+import styles from "./App.module.css";
+
+const taskListURL = "https://jsonplaceholder.typicode.com/todos";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [taskList, setTaskList] = useState([
+    {
+      userId: 1,
+      id: 1,
+      title: "delectus aut autem",
+      completed: true,
+    },
+    {
+      userId: 1,
+      id: 1,
+      title: "delectus aut autem",
+      completed: false,
+    },
+  ]);
+
+  useEffect(() => {
+    fetch(taskListURL)
+      .then((res) => res.json())
+      .then((resData) => {
+        console.log(resData);
+        setTaskList(resData);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally();
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className={styles.taskContainer}>
+        <h1>Tasks</h1>
+        <ul className={styles.taskList}>
+          {taskList.map(({ id, title, completed }) => {
+            return (
+              <li
+                className={`${styles.taskItem} ${completed ? styles.completedTaskItem : styles.unCompletedTaskItem}`}
+                key={id}
+              >
+                <span>{title}</span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
