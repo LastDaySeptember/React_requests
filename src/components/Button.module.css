@@ -1,0 +1,15 @@
+.button {
+  max-width: 100px;
+  flex-grow: 1;
+  flex-shrink: 1;
+}
+
+.button:disabled {
+  background-color: rgba(245, 245, 220, 0.21);
+  color: grey;
+  cursor: not-allowed;
+}
+
+.button:disabled:hover {
+  border: 0px solid black;
+}
