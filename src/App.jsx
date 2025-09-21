@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./components/Button";
 import { Input } from "./components/Input";
 import styles from "./App.module.css";
@@ -9,35 +9,43 @@ import styles from "./App.module.css";
 // http://localhost:3000
 const taskListURL = "http://localhost:3000/tasks";
 
-// functions
-function removeTask() {}
-
-function updateTask() {}
-function searchTask() {}
-function sortTasks() {}
-
 function App() {
   const [taskList, setTaskList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
   const [addValue, setAddValue] = useState("");
+  const [isUpdating, setIsUpdating] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [isSorted, setIsSorted] = useState(false);
   const [isRefreshedTasks, setIsRefreshedTasks] = useState();
+  let taskListBase = useRef();
 
+  // utils
   function refreshTasks() {
     setIsRefreshedTasks(!isRefreshedTasks);
   }
 
+  function getId(event) {
+    const taskContainer = event.target.closest(`.${styles.taskContainer}`);
+    const id = taskContainer.dataset.id;
+    console.log("id", id);
+    return id;
+  }
+
+  function getNewInput(event) {
+    const taskContainer = event.target.closest(`.${styles.taskContainer}`);
+    const initialValue = taskContainer.querySelector("span").textContent;
+    const userValue = prompt("Add updated input: ", initialValue);
+    return userValue;
+  }
+
+  // working with tasks
+
   // on INPUT change
   const onInputChange = (event) => {
     const newValue = event.target.value;
-    const name = event.target.name;
-    if (name == "add") {
-      setAddValue(newValue);
-    } else {
-      setSearchValue(newValue);
-    }
+    setAddValue(newValue);
   };
 
   // add task
@@ -63,9 +71,106 @@ function App() {
       .finally(() => {
         setIsAdding(false);
         refreshTasks();
+        setAddValue("");
       });
   };
 
+  // update task
+  const updateTask = (event) => {
+    setIsUpdating(true);
+
+    const userValue = getNewInput(event);
+    const id = getId(event);
+    const taskListURLToUpdate = taskListURL + "/" + id;
+    console.log("taskListURLToUpdate", taskListURLToUpdate);
+
+    if (userValue === null) {
+      alert("Add valid task");
+      return false;
+    }
+
+    fetch(taskListURLToUpdate, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json;charset=utf-8" },
+      body: JSON.stringify({
+        title: userValue,
+        completed: false,
+      }),
+    })
+      .then((rawResponse) => rawResponse.json())
+      .then((resData) =>
+        console.log(`Updated ${userValue} on server with response: ${resData}`)
+      )
+      .catch((error) => console.log(error))
+      .finally(() => {
+        setIsUpdating(false);
+        refreshTasks();
+      });
+  };
+
+  // SORTINTG
+  function sortingTasks(taskArray) {
+    const sorted = [...taskArray].sort((a, b) =>
+      a.title.localeCompare(b.title)
+    );
+    console.log(sorted);
+    return sorted;
+  }
+
+  const sortTasks = () => {
+    if (isSorted) {
+      setTaskList(taskListBase.current);
+      setIsSorted(false);
+    } else {
+      const sorted = sortingTasks(taskList);
+      setTaskList(sorted);
+      setIsSorted(true);
+    }
+  };
+
+  // searching
+  const searchTask = (value) => {
+    value = value.trim().toLowerCase();
+    console.log("value", value);
+
+    const filteredTaskList = taskList.filter((task) => {
+      let title = task.title.trim().toLowerCase();
+      return title.includes(value);
+    });
+    return filteredTaskList;
+  };
+
+  const onInputSearchChange = (event) => {
+    if (event.target.value.length == 0) {
+      refreshTasks();
+    }
+    const newValue = event.target.value;
+    setSearchValue(newValue);
+    console.log("newValue", newValue);
+    const filteredTaskList = searchTask(newValue);
+    setTaskList(filteredTaskList);
+  };
+
+  // REMOVE
+  const removeTask = (event) => {
+    setIsRemoving(true);
+    const id = getId(event);
+    const taskListURLToDelete = taskListURL + "/" + id;
+
+    fetch(taskListURLToDelete, {
+      method: "DELETE",
+    })
+      .then((rawResponse) => rawResponse.json())
+      .then((resData) =>
+        console.log(`Removed ${id} on server with response: ${resData}`)
+      )
+      .catch((error) => console.log(error))
+      .finally(() => {
+        setIsRemoving(false);
+        refreshTasks();
+      });
+  };
+  //
   // fetch data
   useEffect(() => {
     setIsLoading(true);
@@ -76,6 +181,7 @@ function App() {
       })
       .then((resData) => {
         setTaskList(resData);
+        taskListBase.current = resData;
       })
       .catch((error) => {
         console.log(error);
@@ -110,12 +216,9 @@ function App() {
               <Input
                 name="search"
                 placeholder="Search task"
-                onChange={onInputChange}
+                onChange={onInputSearchChange}
                 value={searchValue}
               />
-              <Button onClick={searchTask} disabled={false}>
-                Search
-              </Button>
             </div>
             <div className={styles.sortingBtnContainer}>
               {!isSorted && (
@@ -132,7 +235,7 @@ function App() {
             <ul className={styles.taskList}>
               {taskList.map(({ id, title, completed }) => {
                 return (
-                  <div className={styles.taskContainer} key={id}>
+                  <div className={styles.taskContainer} key={id} data-id={id}>
                     <li
                       className={`${styles.taskItem} ${completed ? styles.completedTaskItem : styles.unCompletedTaskItem}`}
                     >
